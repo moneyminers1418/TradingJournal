@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trading Diary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: 'var(--text-primary)',
+              secondary: 'var(--text-secondary)',
+              gray: {
+                600: 'var(--color-gray-600)',
+                700: 'var(--color-gray-700)',
+                750: 'var(--color-gray-750)',
+                800: 'var(--color-gray-800)',
+                850: 'var(--color-gray-850)',
+                900: 'var(--color-gray-900)',
+                950: 'var(--color-gray-950)',
+              },
+              trading: {
+                green: '#10B981',
+                red: '#EF4444',
+                blue: '#3B82F6',
+              }
+            },
+            animation: {
+              'bounce-subtle': 'bounceSubtle 2s infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+              'scale-in': 'scaleIn 0.3s ease-out forwards',
+              'confetti': 'confetti 3s ease-in-out infinite',
+            },
+            keyframes: {
+              bounceSubtle: {
+                '0%, 100%': { transform: 'translateY(-5%)' },
+                '50%': { transform: 'translateY(0)' },
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              scaleIn: {
+                '0%': { opacity: '0', transform: 'scale(0.9)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
+              },
+              confetti: {
+                '0%': { transform: 'translateY(-100vh) rotate(0deg)', opacity: '1' },
+                '100%': { transform: 'translateY(100vh) rotate(720deg)', opacity: '0' },
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --color-gray-600: #4b5563;
+        --color-gray-700: #374151;
+        --color-gray-750: #334155;
+        --color-gray-800: #1e293b;
+        --color-gray-850: #1a202c; 
+        --color-gray-900: #0f172a;
+        --color-gray-950: #020617;
+        --text-primary: #f8fafc;
+        --text-secondary: #9ca3af;
+      }
+
+      [data-theme='midnight'] {
+        --color-gray-600: #4b5563;
+        --color-gray-700: #1e40af;
+        --color-gray-750: #1e3a8a;
+        --color-gray-800: #1e293b; 
+        --color-gray-850: #172554;
+        --color-gray-900: #0f172a; 
+        --color-gray-950: #0b1120;
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+      }
+      
+      [data-theme='oled'] {
+        --color-gray-600: #3f3f46;
+        --color-gray-700: #27272a;
+        --color-gray-750: #27272a;
+        --color-gray-800: #18181b;
+        --color-gray-850: #09090b;
+        --color-gray-900: #000000;
+        --color-gray-950: #000000;
+        --text-primary: #e4e4e7;
+        --text-secondary: #a1a1aa;
+      }
+
+      [data-theme='light'] {
+        --color-gray-600: #cbd5e1;
+        --color-gray-700: #e2e8f0;
+        --color-gray-750: #f1f5f9;
+        --color-gray-800: #ffffff;
+        --color-gray-850: #f8fafc;
+        --color-gray-900: #ffffff;
+        --color-gray-950: #f1f5f9;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+      }
+
+      body {
+        background-color: var(--color-gray-950);
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+      }
+
+      .confetti-particle {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #3B82F6;
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: var(--color-gray-900); }
+      ::-webkit-scrollbar-thumb { background: var(--color-gray-750); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "recharts": "https://esm.sh/recharts@^3.6.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
