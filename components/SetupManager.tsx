@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { Trade } from '../types';
 import { SETUP_TYPES } from '../constants';
-import { Plus, Trash2, TrendingUp, Target, BarChart, ArrowUpRight, ArrowDownRight, Info } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, Target, BarChart, ArrowUpRight, ArrowDownRight, Info, Edit } from 'lucide-react';
 
 interface SetupManagerProps {
   trades: Trade[];
   customSetups: string[];
   onAddSetup: (name: string) => void;
   onRemoveSetup: (name: string) => void;
+  onRenameSetup: (oldName: string, newName: string) => void;
 }
 
 interface SetupStats {
@@ -20,11 +21,16 @@ interface SetupStats {
   isCustom: boolean;
 }
 
-export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups, onAddSetup, onRemoveSetup }) => {
+export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups, onAddSetup, onRemoveSetup, onRenameSetup }) => {
   const [newSetupName, setNewSetupName] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const allSetupsList = useMemo(() => [...SETUP_TYPES, ...customSetups], [customSetups]);
+  const allSetupsList = useMemo(() => {
+    const tradeSetups = [...new Set(trades.map(t => t.setup).filter(s => s))];
+    return [...new Set([...SETUP_TYPES, ...customSetups, ...tradeSetups])];
+  }, [trades, customSetups]);
+
+  console.log('allSetupsList:', allSetupsList);
 
   const setupStats = useMemo(() => {
     return allSetupsList.map(setupName => {
@@ -64,6 +70,7 @@ export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups
     }
   };
 
+  console.log('SetupManager rendering');
   return (
     <div className="space-y-8 animate-fade-in-up">
       
@@ -135,7 +142,20 @@ export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups
                     <BarChart size={16} />
                  </div>
                  {stat.isCustom && (
-                   <button 
+                   <button
+                     onClick={() => {
+                       const newName = prompt('Enter new name for ' + stat.name);
+                       if (newName && newName.trim()) {
+                         onRenameSetup(stat.name, newName.trim());
+                       }
+                     }}
+                     className="p-2 text-gray-600 hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all"
+                   >
+                     <Edit size={16} />
+                   </button>
+                 )}
+                 {stat.isCustom && (
+                   <button
                     onClick={() => onRemoveSetup(stat.name)}
                     className="p-2 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                    >

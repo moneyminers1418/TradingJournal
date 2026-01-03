@@ -1,21 +1,39 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   BarChart, Bar, Cell, ReferenceLine
 } from 'recharts';
 import { Trade } from '../types';
 import { StatCard } from './StatCard';
-import { TrendingUp, IndianRupee, Target, Zap, CalendarDays, BarChart2 } from 'lucide-react';
+import { TrendingUp, IndianRupee, Target, Zap, CalendarDays, BarChart2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DashboardProps {
   trades: Trade[];
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ trades }) => {
-  
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const goToPrevMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+  const goToNextMonth = () => {
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+   
   // Use exitDate to determine closed trades
   const closedTrades = useMemo(() => trades.filter(t => t.exitDate).sort((a, b) => new Date(a.exitDate!).getTime() - new Date(b.exitDate!).getTime()), [trades]);
-
+  const monthTrades = useMemo(() => {
+    const start = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const end = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0, 23, 59, 59);
+    return closedTrades.filter(t => {
+      const exit = new Date(t.exitDate!);
+      return exit >= start && exit <= end;
+    }).sort((a, b) => new Date(a.exitDate!).getTime() - new Date(b.exitDate!).getTime());
+  }, [closedTrades, currentMonth]);
+   
   // Calculate Stats
   const totalPnL = closedTrades.reduce((acc, t) => acc + (t.pnl || 0), 0);
   const winTrades = closedTrades.filter(t => (t.pnl || 0) > 0);
@@ -89,8 +107,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ trades }) => {
 
   // Weekly PnL Calculation
   const weeklyPnLStats: Record<string, number> = {};
-  
-  closedTrades.forEach(t => {
+   
+  monthTrades.forEach(t => {
       const d = new Date(t.exitDate!);
       // Get Monday of the week
       const day = d.getDay();
@@ -113,7 +131,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ trades }) => {
 
   // Equity Curve Data
   let cumulative = 0;
-  const equityData = closedTrades.map(t => {
+  const equityData = monthTrades.map(t => {
     cumulative += (t.pnl || 0);
     return {
       date: new Date(t.exitDate!).toLocaleDateString(),
@@ -183,7 +201,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ trades }) => {
         
         {/* Equity Curve */}
         <div className="lg:col-span-2 bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-sm">
-          <h3 className="text-lg font-semibold text-white mb-4">Equity Curve</h3>
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center justify-between">
+            <span>Equity Curve</span>
+            <div className="flex items-center gap-2">
+              <button onClick={goToPrevMonth} className="p-1 hover:bg-gray-700 rounded text-gray-300"><ChevronLeft size={16} /></button>
+              <span className="text-sm text-gray-300">{currentMonth.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</span>
+              <button onClick={goToNextMonth} className="p-1 hover:bg-gray-700 rounded text-gray-300"><ChevronRight size={16} /></button>
+            </div>
+          </h3>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={equityData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -267,9 +292,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ trades }) => {
 
       {/* Weekly PnL Chart */}
       <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-sm">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-           <BarChart2 size={18} className="text-gray-400"/>
-           Weekly Net P&L
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart2 size={18} className="text-gray-400"/>
+            Weekly Net P&L
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={goToPrevMonth} className="p-1 hover:bg-gray-700 rounded text-gray-300"><ChevronLeft size={16} /></button>
+            <span className="text-sm text-gray-300">{currentMonth.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</span>
+            <button onClick={goToNextMonth} className="p-1 hover:bg-gray-700 rounded text-gray-300"><ChevronRight size={16} /></button>
+          </div>
         </h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">

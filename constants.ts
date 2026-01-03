@@ -132,12 +132,8 @@ export const MOCK_TRADES: Trade[] = [
 
 export const SETUP_TYPES = [
   'Breakout',
-  'Reversal',
-  'Trend Following',
   'Scalp',
-  'Support/Resistance',
-  'Gap Fill',
-  'News Catalyst'
+  'Support/Resistance'
 ];
 
 export const COMMON_MISTAKES = [

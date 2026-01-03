@@ -100,18 +100,10 @@ const App: React.FC = () => {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         console.log('Loading user data for:', firebaseUser.uid);
         try {
-          // Use setDoc with merge to create/update user document
-          await setDoc(userDocRef, {
-            challenge,
-            completedChallenges: [],
-            customSetups: [],
-            customRules: DEFAULT_RULES,
-            mistakesList: COMMON_MISTAKES
-          }, { merge: true });
-
-          // Now read the document
           const userDoc = await getDoc(userDocRef);
+
           if (userDoc.exists()) {
+            // If user exists, just load their data
             const userData = userDoc.data();
             console.log('User data loaded:', userData);
             setChallenge(userData.challenge || challenge);
@@ -119,6 +111,15 @@ const App: React.FC = () => {
             setCustomSetups(userData.customSetups || []);
             setCustomRules(userData.customRules || DEFAULT_RULES);
             setMistakesList(userData.mistakesList || COMMON_MISTAKES);
+          } else {
+            // ONLY if it's a brand new user, create the initial document
+            await setDoc(userDocRef, {
+              challenge,
+              completedChallenges: [],
+              customSetups: [],
+              customRules: DEFAULT_RULES,
+              mistakesList: COMMON_MISTAKES
+            });
           }
         } catch (error) {
           console.error('Error loading user data:', error);
@@ -221,14 +222,16 @@ const App: React.FC = () => {
     if (!auth.currentUser || SETUP_TYPES.includes(newSetup) || customSetups.includes(newSetup)) return;
 
     const updatedSetups = [...customSetups, newSetup];
-    setCustomSetups(updatedSetups);
 
-    // Update Firestore
+    // Update Firestore first
     const userDocRef = doc(db, 'users', auth.currentUser.uid);
     try {
-      await setDoc(userDocRef, {
+      await updateDoc(userDocRef, {
         customSetups: updatedSetups
-      }, { merge: true });
+      });
+      console.log('Custom setup saved to Firestore');
+      // Then update local state
+      setCustomSetups(updatedSetups);
     } catch (error) {
       console.error('Error adding setup:', error);
     }
@@ -238,16 +241,40 @@ const App: React.FC = () => {
     if (!auth.currentUser) return;
 
     const updatedSetups = customSetups.filter(s => s !== setupToRemove);
+
+    // Update Firestore first
+    const userDocRef = doc(db, 'users', auth.currentUser.uid);
+    try {
+      await updateDoc(userDocRef, {
+        customSetups: updatedSetups
+      });
+      // Then update local state
+      setCustomSetups(updatedSetups);
+    } catch (error) {
+      console.error('Error removing setup:', error);
+    }
+  };
+
+  const handleRenameSetup = async (oldName: string, newName: string) => {
+    if (!auth.currentUser || !customSetups.includes(oldName) || customSetups.includes(newName) || SETUP_TYPES.includes(newName)) return;
+
+    const updatedSetups = customSetups.map(s => s === oldName ? newName : s);
     setCustomSetups(updatedSetups);
 
     // Update Firestore
     const userDocRef = doc(db, 'users', auth.currentUser.uid);
     try {
-      await setDoc(userDocRef, {
+      await updateDoc(userDocRef, {
         customSetups: updatedSetups
-      }, { merge: true });
+      });
+
+      // Update all trades with the old setup name
+      const tradesToUpdate = trades.filter(t => t.setup === oldName);
+      for (const trade of tradesToUpdate) {
+        await updateTrade(trade.id, { ...trade, setup: newName });
+      }
     } catch (error) {
-      console.error('Error removing setup:', error);
+      console.error('Error renaming setup:', error);
     }
   };
 
@@ -528,6 +555,7 @@ const App: React.FC = () => {
               customSetups={customSetups}
               onAddSetup={handleAddSetup}
               onRemoveSetup={handleRemoveSetup}
+              onRenameSetup={handleRenameSetup}
             />
           )}
           {currentView === View.ANALYSIS && <AIAnalyst trades={trades} />}
