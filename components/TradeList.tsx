@@ -3,17 +3,18 @@ import { Trade, TradeType, AssetClass } from '../types';
 import { Edit2, Trash2, Search, Filter, X, Image as ImageIcon, Clock, Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
 
 interface TradeListProps {
-  trades: Trade[];
-  onEdit: (trade: Trade) => void;
-  onDelete: (id: string) => void;
-  availableSetups: string[];
+   trades: Trade[];
+   onEdit: (trade: Trade) => void;
+   onDelete: (id: string) => void;
+   availableSetups: string[];
+   initialSetupFilter?: string;
 }
 
-export const TradeList: React.FC<TradeListProps> = ({ trades, onEdit, onDelete, availableSetups }) => {
-  const [textFilter, setTextFilter] = useState('');
-  const [assetFilter, setAssetFilter] = useState<string>('All');
-  const [typeFilter, setTypeFilter] = useState<string>('All');
-  const [setupFilter, setSetupFilter] = useState<string>('All');
+export const TradeList: React.FC<TradeListProps> = ({ trades, onEdit, onDelete, availableSetups, initialSetupFilter }) => {
+   const [textFilter, setTextFilter] = useState('');
+   const [assetFilter, setAssetFilter] = useState<string>('All');
+   const [typeFilter, setTypeFilter] = useState<string>('All');
+   const [setupFilter, setSetupFilter] = useState<string>(initialSetupFilter || 'All');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   

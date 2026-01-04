@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, BookOpen, Plus, LineChart, Wallet, Calendar, Palette, LogOut, User, Trophy, Settings2 } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Plus, LineChart, Wallet, Calendar, Palette, LogOut, User, Trophy, Settings2, Menu, X } from 'lucide-react';
 import { Trade, GrowthChallenge } from './types';
 import { MOCK_TRADES, SETUP_TYPES, DEFAULT_RULES, COMMON_MISTAKES } from './constants';
 import { Dashboard } from './components/Dashboard';
@@ -48,6 +48,10 @@ const App: React.FC = () => {
   const [customRules, setCustomRules] = useState<string[]>(DEFAULT_RULES);
   const [mistakesList, setMistakesList] = useState<string[]>(COMMON_MISTAKES);
   const [theme, setTheme] = useState<Theme>('default');
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [journalSetupFilter, setJournalSetupFilter] = useState<string>('All');
 
   const [challenge, setChallenge] = useState<GrowthChallenge>({
     id: crypto.randomUUID(),
@@ -412,7 +416,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-950 text-primary flex flex-col md:flex-row transition-all duration-500 ease-in-out">
 
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-gray-900 border-r border-gray-700 flex-shrink-0 flex flex-col h-screen sticky top-0 transition-transform duration-300">
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-700 flex flex-col h-screen transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="p-6 flex items-center justify-between border-b border-gray-700">
           <div className="flex items-center space-x-3 group cursor-pointer">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/50 group-hover:scale-110 transition-transform">
@@ -433,7 +437,7 @@ const App: React.FC = () => {
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setCurrentView(item.id as View)}
+              onClick={() => { setCurrentView(item.id as View); setSidebarOpen(false); }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all transform hover:translate-x-1 ${
                 currentView === item.id
                   ? item.highlight ? 'bg-purple-600/10 text-purple-400 border border-purple-600/20' : 'bg-blue-600/10 text-blue-400 border border-blue-600/20'
@@ -492,9 +496,14 @@ const App: React.FC = () => {
         </div>
       </aside>
 
+      {sidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />}
+
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto h-screen p-4 md:p-8 relative scroll-smooth">
-        <header className="flex justify-between items-center mb-10 animate-fade-in-up">
+        <header className="flex items-center justify-between mb-10 animate-fade-in-up">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white mr-4">
+            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
           <div>
             <h1 className="text-3xl font-black text-primary tracking-tight">{currentView}</h1>
             <p className="text-secondary text-sm mt-1">
@@ -532,7 +541,7 @@ const App: React.FC = () => {
           {currentView === View.DASHBOARD && <Dashboard trades={trades} />}
           {currentView === View.JOURNAL && (
             <div className="h-[calc(100vh-14rem)]">
-              <TradeList trades={trades} onEdit={handleEditTrade} onDelete={handleDeleteTrade} availableSetups={allSetups} />
+              <TradeList trades={trades} onEdit={handleEditTrade} onDelete={handleDeleteTrade} availableSetups={allSetups} initialSetupFilter={journalSetupFilter} />
             </div>
           )}
           {currentView === View.CALENDAR && (
@@ -556,6 +565,7 @@ const App: React.FC = () => {
               onAddSetup={handleAddSetup}
               onRemoveSetup={handleRemoveSetup}
               onRenameSetup={handleRenameSetup}
+              navigateToJournalWithFilter={(setup: string) => { setCurrentView(View.JOURNAL); setJournalSetupFilter(setup); }}
             />
           )}
           {currentView === View.ANALYSIS && <AIAnalyst trades={trades} />}

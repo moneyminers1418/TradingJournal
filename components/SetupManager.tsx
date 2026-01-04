@@ -9,6 +9,7 @@ interface SetupManagerProps {
   onAddSetup: (name: string) => void;
   onRemoveSetup: (name: string) => void;
   onRenameSetup: (oldName: string, newName: string) => void;
+  navigateToJournalWithFilter: (setup: string) => void;
 }
 
 interface SetupStats {
@@ -21,7 +22,7 @@ interface SetupStats {
   isCustom: boolean;
 }
 
-export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups, onAddSetup, onRemoveSetup, onRenameSetup }) => {
+export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups, onAddSetup, onRemoveSetup, onRenameSetup, navigateToJournalWithFilter }) => {
   const [newSetupName, setNewSetupName] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -30,7 +31,6 @@ export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups
     return [...new Set([...SETUP_TYPES, ...customSetups, ...tradeSetups])];
   }, [trades, customSetups]);
 
-  console.log('allSetupsList:', allSetupsList);
 
   const setupStats = useMemo(() => {
     return allSetupsList.map(setupName => {
@@ -70,7 +70,6 @@ export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups
     }
   };
 
-  console.log('SetupManager rendering');
   return (
     <div className="space-y-8 animate-fade-in-up">
       
@@ -129,7 +128,7 @@ export const SetupManager: React.FC<SetupManagerProps> = ({ trades, customSetups
       {/* Strategy Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {setupStats.map(stat => (
-          <div key={stat.name} className="group bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all">
+          <div key={stat.name} className="group bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all cursor-pointer" onClick={() => navigateToJournalWithFilter(stat.name)}>
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h4 className="text-white font-bold text-lg leading-none">{stat.name}</h4>

@@ -7,15 +7,16 @@ interface StatCardProps {
   trendDirection?: 'up' | 'down' | 'neutral';
   icon?: React.ReactNode;
   subValue?: string;
+  onClick?: () => void;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, trend, trendDirection, icon, subValue }) => {
+export const StatCard: React.FC<StatCardProps> = ({ title, value, trend, trendDirection, icon, subValue, onClick }) => {
   const trendColor = 
     trendDirection === 'up' ? 'text-trading-green' : 
     trendDirection === 'down' ? 'text-trading-red' : 'text-gray-400';
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+    <div className={`bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`} {...(onClick ? { onClick } : {})}>
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-gray-400 text-sm font-medium uppercase tracking-wider">{title}</h3>
         {icon && <div className="text-gray-500">{icon}</div>}
